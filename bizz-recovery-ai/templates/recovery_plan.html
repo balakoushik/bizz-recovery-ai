@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Recovery Plans · Bizz Recovery AI{% endblock %}
+{% block page_title %}Recovery Plans{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="chart-card mb-3">
+      <h6><i class="bi bi-magic me-1"></i>Generate New Plan</h6>
+      {% if projects %}
+      <form method="POST" action="" id="genForm">
+        <label class="form-label">Select Project</label>
+        <select class="form-select mb-3" id="genProjectSelect">
+          {% for p in projects %}
+          <option value="{{ p.id }}">{{ p.name }}</option>
+          {% endfor %}
+        </select>
+        <button type="button" class="btn btn-primary w-100" onclick="submitGenerate()">
+          <i class="bi bi-stars me-1"></i>Generate Recovery Plan
+        </button>
+      </form>
+      <script>
+        function submitGenerate(){
+          const id = document.getElementById('genProjectSelect').value;
+          const f = document.createElement('form');
+          f.method = 'POST';
+          f.action = `/recovery-plans/generate/${id}`;
+          document.body.appendChild(f);
+          f.submit();
+        }
+      </script>
+      {% else %}
+      <p class="text-muted small mb-0">Create a project first.</p>
+      {% endif %}
+    </div>
+
+    <div class="chart-card">
+      <h6><i class="bi bi-clock-history me-1"></i>Past Plans</h6>
+      {% for plan in plans %}
+      <a href="{{ url_for('recovery.view_plan', plan_id=plan.id) }}"
+         class="d-block small text-decoration-none mb-2 p-2 rounded"
+         style="background: {{ 'var(--panel)' if active_plan and active_plan.id == plan.id else 'transparent' }}; color: var(--text); border:1px solid var(--border);">
+        {{ plan.title }}<br><span class="text-muted">{{ plan.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+      </a>
+      {% else %}
+      <p class="text-muted small mb-0">No recovery plans generated yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    {% if active_plan %}
+    {% set c = active_plan.content %}
+    <div class="chart-card">
+      <div class="d-flex justify-content-between align-items-start mb-3 no-print">
+        <h5 class="mb-0">{{ active_plan.title }}</h5>
+        <button class="btn btn-sm btn-outline-light" onclick="window.print()"><i class="bi bi-printer"></i> Print</button>
+      </div>
+
+      <h6 class="risk-action-label">1. Executive Summary</h6>
+      <p>{{ c.executive_summary }}</p>
+
+      <h6 class="risk-action-label">2. Current Situation</h6>
+      <p>{{ c.current_situation }}</p>
+
+      <h6 class="risk-action-label">3 &amp; 4. Detected Risks &amp; Severity</h6>
+      <div class="mb-2">
+        <span class="badge-severity badge-CRITICAL me-1">Critical: {{ c.risk_severity_breakdown.CRITICAL }}</span>
+        <span class="badge-severity badge-HIGH me-1">High: {{ c.risk_severity_breakdown.HIGH }}</span>
+        <span class="badge-severity badge-MEDIUM me-1">Medium: {{ c.risk_severity_breakdown.MEDIUM }}</span>
+        <span class="badge-severity badge-LOW">Low: {{ c.risk_severity_breakdown.LOW }}</span>
+      </div>
+
+      <h6 class="risk-action-label">5. Root Causes</h6>
+      <ul>{% for rc in c.root_causes %}<li>{{ rc }}</li>{% endfor %}</ul>
+
+      <h6 class="risk-action-label">6. Immediate Actions</h6>
+      <ul>{% for a in c.immediate_actions %}<li>{{ a }}</li>{% endfor %}</ul>
+
+      <h6 class="risk-action-label">7. Short-Term Recovery</h6>
+      <ul>{% for a in c.short_term_recovery %}<li>{{ a }}</li>{% endfor %}</ul>
+
+      <h6 class="risk-action-label">8. Long-Term Recovery</h6>
+      <ul>{% for a in c.long_term_recovery %}<li>{{ a }}</li>{% endfor %}</ul>
+
+      <h6 class="risk-action-label">9. Required Resources</h6>
+      <p>{{ c.required_resources|join(', ') }}</p>
+
+      <h6 class="risk-action-label">10. Estimated Cost</h6>
+      <p>₹{{ "{:,.0f}".format(c.estimated_cost) }}</p>
+
+      <h6 class="risk-action-label">11. Responsible Team</h6>
+      <p>{{ c.responsible_team }}</p>
+
+      <h6 class="risk-action-label">12. Recovery Timeline</h6>
+      <p>{{ c.recovery_timeline.start }} → {{ c.recovery_timeline.target_completion }} ({{ c.recovery_timeline.duration_days }} days)</p>
+
+      <h6 class="risk-action-label">13. Success Metrics</h6>
+      <ul>{% for m in c.success_metrics %}<li>{{ m }}</li>{% endfor %}</ul>
+
+      <h6 class="risk-action-label">14. Monitoring Plan</h6>
+      <p class="mb-0">{{ c.monitoring_plan }}</p>
+    </div>
+    {% else %}
+    <div class="chart-card text-center py-5">
+      <i class="bi bi-life-preserver display-4 text-muted"></i>
+      <p class="mt-3 text-muted">Select a project on the left and generate a recovery plan, or open one from the history.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}{{ project.name }} · Bizz Recovery AI{% endblock %}
+{% block page_title %}{{ project.name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <div>
+    <p class="text-muted mb-1">{{ project.industry }} · {{ project.tech_stack }}</p>
+    <p class="mb-0">{{ project.description }}</p>
+  </div>
+  <div class="text-end">
+    <form method="POST" action="{{ url_for('projects.delete_project', project_id=project.id) }}"
+          onsubmit="return confirm('Delete this project and all its data?');">
+      <button class="btn btn-outline-light btn-sm"><i class="bi bi-trash"></i> Delete</button>
+    </form>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3 col-6"><div class="stat-card accent-primary"><div class="stat-label">Overall Health</div><div class="stat-value">{{ health.overall_health }}</div></div></div>
+  <div class="col-md-3 col-6"><div class="stat-card"><div class="stat-label">Budget Used</div><div class="stat-value">{{ project.budget_utilization }}%</div></div></div>
+  <div class="col-md-3 col-6"><div class="stat-card"><div class="stat-label">Progress</div><div class="stat-value">{{ project.progress }}%</div></div></div>
+  <div class="col-md-3 col-6"><div class="stat-card accent-warning"><div class="stat-label">Schedule Gap</div><div class="stat-value">{{ project.schedule_gap }}%</div></div></div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-5">
+    <div class="chart-card h-100">
+      <h6><i class="bi bi-heart-pulse-fill me-1"></i>Health Breakdown</h6>
+      {% for label, key in [("Financial","financial_health"),("Schedule","schedule_health"),("Technical","technical_health"),("Security","security_health"),("Resource","resource_health"),("Customer","customer_health"),("Operational","operational_health")] %}
+      <div class="d-flex justify-content-between small mb-1 mt-2"><span class="text-muted">{{ label }}</span><span>{{ health[key] }}/100</span></div>
+      <div class="health-bar"><div class="health-bar-fill" style="width:{{ health[key] }}%"></div></div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="chart-card h-100">
+      <h6><i class="bi bi-info-circle-fill me-1"></i>Project Signals</h6>
+      <table class="table table-sm">
+        <tbody>
+          <tr><td class="text-muted">Budget</td><td>₹{{ "{:,.0f}".format(project.budget) }} (spent ₹{{ "{:,.0f}".format(project.current_spending) }})</td></tr>
+          <tr><td class="text-muted">Team Size</td><td>{{ project.team_size }}</td></tr>
+          <tr><td class="text-muted">Infrastructure</td><td>{{ project.infrastructure_type }} — CPU {{ project.cpu_utilization }}%, Mem {{ project.memory_utilization }}%, Storage {{ project.storage_utilization }}%, Net {{ project.network_utilization }}%</td></tr>
+          <tr><td class="text-muted">Server Availability</td><td>{{ project.server_availability }}%</td></tr>
+          <tr><td class="text-muted">Security Incidents</td><td>{{ project.security_incidents }}</td></tr>
+          <tr><td class="text-muted">Customer Satisfaction</td><td>{{ project.customer_satisfaction }}/100</td></tr>
+          <tr><td class="text-muted">Unresolved Issues</td><td>{{ project.unresolved_issues }}</td></tr>
+          <tr><td class="text-muted">Dependency Delays</td><td>{{ project.dependency_delays }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <h6 class="mb-0"><i class="bi bi-radar me-1"></i>Detected Risks ({{ risks|selectattr('status','equalto','Active')|list|length }} active)</h6>
+  <a href="{{ url_for('risks.risk_analysis', project_id=project.id) }}" class="btn btn-sm btn-outline-light">Full Risk Analysis</a>
+</div>
+
+{% for r in risks %}
+{% if r.status == 'Active' %}
+<div class="risk-card">
+  <div class="d-flex justify-content-between align-items-start">
+    <h6>{{ r.title }}</h6>
+    <span class="badge-severity badge-{{ r.severity }}">{{ r.severity }}</span>
+  </div>
+  <div class="risk-meta">{{ r.category }} · Score {{ r.risk_score }} · Probability {{ r.probability }}% · Impact {{ r.impact }}%</div>
+  <p class="small mb-0">{{ r.description }}</p>
+</div>
+{% endif %}
+{% else %}
+<p class="text-muted">No risks detected yet.</p>
+{% endfor %}
+{% endblock %}

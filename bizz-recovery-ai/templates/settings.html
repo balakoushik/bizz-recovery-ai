@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Settings · Bizz Recovery AI{% endblock %}
+{% block page_title %}Settings{% endblock %}
+
+{% block content %}
+<div class="chart-card mb-3">
+  <h6><i class="bi bi-stars me-1"></i>AI Assistant Mode</h6>
+  {% if llm_configured %}
+  <p class="mb-1"><span class="badge text-bg-success">External LLM Enabled</span></p>
+  <p class="small text-muted mb-0">An <code>ANTHROPIC_API_KEY</code> is configured, so the AI Assistant uses Claude to generate richer answers, grounded in your project data.</p>
+  {% else %}
+  <p class="mb-1"><span class="badge text-bg-secondary">Local Intelligence Mode</span></p>
+  <p class="small text-muted mb-0">No external API key is configured — the AI Assistant uses the built-in rule-based reasoning engine, working entirely offline over your real project data. To enable the optional external LLM mode, set <code>ANTHROPIC_API_KEY</code> in your <code>.env</code> file and restart the app.</p>
+  {% endif %}
+</div>
+
+<div class="chart-card mb-3">
+  <h6><i class="bi bi-hdd-network me-1"></i>Data &amp; Storage</h6>
+  <p class="small mb-0">All project, risk, and recovery data is stored locally in a SQLite database file (<code>bizz_recovery.db</code>) in the application folder. No data leaves your machine unless you enable the optional external LLM mode.</p>
+</div>
+
+<div class="chart-card">
+  <h6><i class="bi bi-info-circle me-1"></i>About</h6>
+  <p class="small mb-0">Bizz Recovery AI — AI-Powered Business &amp; Project Risk Prediction, Prevention and Recovery Platform. Built with Flask, SQLAlchemy, scikit-learn, and Chart.js.</p>
+</div>
+{% endblock %}

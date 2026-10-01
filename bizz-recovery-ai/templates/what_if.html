@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}What-If Simulation · Bizz Recovery AI{% endblock %}
+{% block page_title %}What-If Simulation{% endblock %}
+
+{% block content %}
+{% if not projects %}
+<div class="text-center py-5">
+  <i class="bi bi-sliders display-4 text-muted"></i>
+  <p class="mt-3 text-muted">Create a project first to run simulations.</p>
+</div>
+{% else %}
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="chart-card">
+      <h6><i class="bi bi-sliders me-1"></i>Simulation Inputs</h6>
+      <label class="form-label mt-2">Project</label>
+      <select class="form-select mb-3" id="wifProject">
+        {% for p in projects %}
+        <option value="{{ p.id }}" {{ 'selected' if selected and selected.id == p.id }}>{{ p.name }}</option>
+        {% endfor %}
+      </select>
+
+      {% for id, label, min, max, val in [
+        ("budget_pct","Budget Change (%)",-50,50,0),
+        ("monthly_cost_pct","Monthly Cost Change (%)",-50,100,0),
+        ("team_size_delta","Team Size Change",-10,10,0),
+        ("progress_delta","Progress Change (%)",-30,30,0),
+        ("customer_satisfaction_delta","Customer Satisfaction Change",-40,40,0),
+        ("security_incidents_delta","Security Incidents Change",-3,5,0),
+        ("infra_utilization_delta","Infrastructure Utilization Change (%)",-40,40,0)
+      ] %}
+      <label class="form-label d-flex justify-content-between mt-2">
+        <span>{{ label }}</span><span id="{{ id }}_val">{{ val }}</span>
+      </label>
+      <input type="range" class="form-range wif-slider" id="{{ id }}" min="{{ min }}" max="{{ max }}" value="{{ val }}">
+      {% endfor %}
+
+      <button class="btn btn-primary w-100 mt-3" onclick="runSimulation()"><i class="bi bi-play-fill me-1"></i>Run Simulation</button>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div id="wifResults">
+      <div class="chart-card text-center py-5">
+        <i class="bi bi-play-circle display-4 text-muted"></i>
+        <p class="mt-3 text-muted">Adjust the sliders and click "Run Simulation" to see BEFORE vs AFTER impact.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/what_if.js') }}"></script>
+{% endblock %}

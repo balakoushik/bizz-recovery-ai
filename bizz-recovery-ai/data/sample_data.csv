@@ -1,0 +1,5 @@
+name,industry,budget,current_spending,progress,expected_progress,team_size,cpu_utilization,memory_utilization,storage_utilization,network_utilization,server_availability,security_incidents,customer_satisfaction,unresolved_issues,dependency_delays
+E-Commerce Platform,E-commerce,500000,410000,62,75,6,88,79,71,65,97.2,2,58,14,1
+Core Banking Migration,Banking,2000000,1250000,48,55,14,62,58,66,54,99.4,0,74,6,0
+Healthcare Patient Portal,Healthcare,350000,340000,91,100,5,45,51,48,39,99.9,1,81,9,2
+SaaS Inventory Manager,SaaS,180000,95000,35,30,4,33,40,28,25,99.8,0,88,3,0

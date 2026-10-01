@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Reports · Bizz Recovery AI{% endblock %}
+{% block page_title %}Reports{% endblock %}
+
+{% block content %}
+{% if not projects %}
+<div class="text-center py-5">
+  <i class="bi bi-file-earmark-text display-4 text-muted"></i>
+  <p class="mt-3 text-muted">Create a project first to generate a report.</p>
+</div>
+{% else %}
+<div class="d-flex flex-wrap gap-2 mb-3 no-print">
+  {% for p in projects %}
+  <a class="project-pill {{ 'active' if selected and selected.id == p.id }}"
+     href="{{ url_for('pages.reports', project_id=p.id) }}">{{ p.name }}</a>
+  {% endfor %}
+  <button class="btn btn-sm btn-primary ms-auto" onclick="window.print()"><i class="bi bi-printer"></i> Print / Save PDF</button>
+</div>
+
+<div class="chart-card">
+  <h4 class="mb-1">Business &amp; Project Risk Report</h4>
+  <p class="text-muted mb-4">{{ selected.name }} · Generated {{ selected.created_at.strftime('%Y-%m-%d') if selected.created_at }}</p>
+
+  <h6 class="risk-action-label">Project Information</h6>
+  <table class="table table-sm mb-4">
+    <tbody>
+      <tr><td class="text-muted">Industry</td><td>{{ selected.industry }}</td></tr>
+      <tr><td class="text-muted">Status</td><td>{{ selected.status }}</td></tr>
+      <tr><td class="text-muted">Budget</td><td>₹{{ "{:,.0f}".format(selected.budget) }} (spent ₹{{ "{:,.0f}".format(selected.current_spending) }}, {{ selected.budget_utilization }}%)</td></tr>
+      <tr><td class="text-muted">Progress</td><td>{{ selected.progress }}% (expected {{ selected.expected_progress }}%)</td></tr>
+      <tr><td class="text-muted">Team Size</td><td>{{ selected.team_size }}</td></tr>
+    </tbody>
+  </table>
+
+  <h6 class="risk-action-label">Health Score</h6>
+  <p>Overall: <strong>{{ health.overall_health }}/100</strong> — Financial {{ health.financial_health }}, Schedule {{ health.schedule_health }}, Technical {{ health.technical_health }}, Security {{ health.security_health }}, Resource {{ health.resource_health }}, Customer {{ health.customer_health }}, Operational {{ health.operational_health }}.</p>
+
+  <h6 class="risk-action-label mt-4">Risk Summary</h6>
+  {% set active = risks|selectattr('status','equalto','Active')|list %}
+  <p>{{ active|length }} active risk(s) detected.</p>
+  <table class="table table-sm mb-4">
+    <thead><tr><th>Risk</th><th>Category</th><th>Severity</th><th>Score</th></tr></thead>
+    <tbody>
+      {% for r in active|sort(attribute='risk_score', reverse=True) %}
+      <tr><td>{{ r.title }}</td><td>{{ r.category }}</td><td><span class="badge-severity badge-{{ r.severity }}">{{ r.severity }}</span></td><td>{{ r.risk_score }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h6 class="risk-action-label">Critical Risks</h6>
+  {% set critical = active|selectattr('severity','equalto','CRITICAL')|list %}
+  {% if critical %}
+  <ul>{% for r in critical %}<li>{{ r.title }}: {{ r.description }}</li>{% endfor %}</ul>
+  {% else %}
+  <p class="text-muted">No critical risks currently detected.</p>
+  {% endif %}
+
+  <h6 class="risk-action-label mt-3">Recovery Recommendations</h6>
+  <ul>
+    {% for r in active|sort(attribute='risk_score', reverse=True) %}
+    {% if loop.index <= 5 %}<li>{{ r.title }}: {{ r.recovery_action }}</li>{% endif %}
+    {% endfor %}
+  </ul>
+
+  <h6 class="risk-action-label mt-3">Overall Recommendation</h6>
+  <p class="mb-0">
+    {% if health.overall_health >= 75 %}
+    The project is in good health. Continue current monitoring cadence and maintain preventive practices.
+    {% elif health.overall_health >= 50 %}
+    The project shows moderate risk. Prioritize the top active risks above and re-run analysis after mitigations are applied.
+    {% else %}
+    The project is under significant risk. Immediate action is recommended — consider generating a full Recovery Plan.
+    {% endif %}
+  </p>
+</div>
+{% endif %}
+{% endblock %}
